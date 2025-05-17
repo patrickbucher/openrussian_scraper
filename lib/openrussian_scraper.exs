@@ -2,8 +2,6 @@ defmodule OpenrussianScraper do
   @base_url "https://api.openrussian.org/api/wordlists"
   @levels ["A1", "A2", "B1", "B2", "C1", "C2"]
   @fetch_size 50
-  @raw_accent "'"
-  @combining_accent "\u{0301}"
 
   def scrape(lang, level) when level in @levels do
     client = Req.new(base_url: @base_url)
@@ -21,8 +19,7 @@ defmodule OpenrussianScraper do
         %{
           ru:
             Map.get(entry, "accented")
-            |> juxtapose_accent
-            |> String.normalize(:nfc),
+            |> Accent.juxtapose_accent(),
           de: Enum.join(Map.get(entry, "translations"), "; ") |> String.replace("\"", "")
         }
       end)
@@ -32,16 +29,6 @@ defmodule OpenrussianScraper do
       scrape(client, lang, level, offset + @fetch_size, acc)
     else
       acc
-    end
-  end
-
-  defp juxtapose_accent(word) do
-    if String.contains?(word, @raw_accent) do
-      [prefix, suffix] = String.split(word, @raw_accent, parts: 2)
-      [last | rest_reversed] = prefix |> String.graphemes() |> Enum.reverse()
-      Enum.join(Enum.reverse(rest_reversed), "") <> to_string([@combining_accent, last]) <> suffix
-    else
-      word
     end
   end
 
