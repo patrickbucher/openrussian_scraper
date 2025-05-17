@@ -11,3 +11,11 @@ Fetch frequency list for English (`en`) translations for level B2:
     mix run lib/openrussian_scraper.exs en B2 > ru-en-b2.csv
 
 **Note**: A higher list (e.g. B2) does _not_ contain the words of the lower lists (e.g. A1, A2, B1).
+
+## TODO
+
+- [ ] Write an additional script that processes a CSV file.
+    - input: words with simple accent: `Достое'вский`: `'` after stressed vowel
+    - output: words with stressed vowel and combining character (U+0301)
+    - benefit: no need to type in words in Anki; just write your CSV file in a
+      text editor, process it, and import it to Anki
