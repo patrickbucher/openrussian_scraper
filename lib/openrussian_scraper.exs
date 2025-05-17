@@ -1,61 +1,55 @@
 defmodule OpenrussianScraper do
-  # TODO: also support en.openrussian.org (command line arg)
-  @base_url "https://de.openrussian.org"
+  @base_url "https://api.openrussian.org/api/wordlists"
   @levels ["A1", "A2", "B1", "B2", "C1", "C2"]
   @fetch_size 50
+  @raw_accent "'"
+  @combining_accent "\u{0301}"
 
-  def scrape(level) when level in @levels do
+  def scrape(lang, level) when level in @levels do
     client = Req.new(base_url: @base_url)
-    result = scrape(client, level, 0, [])
-    Enum.each(result, fn r -> IO.puts(r) end)
+    result = scrape(client, lang, level, 0, [])
+    Enum.each(result, fn r -> IO.puts("\"#{Map.get(r, :ru)}\",\"#{Map.get(r, :de)}\"") end)
   end
 
-  defp scrape(client, level, offset, acc) do
-    path = build_path(level, offset)
-    IO.puts(path)
+  defp scrape(client, lang, level, offset, acc) when lang in ["en", "de"] do
+    path = build_path(lang, level, offset)
 
     rows =
-      Req.get!(client, url: path).body
-      |> Floki.find("table.wordlist tr")
-      |> Enum.map(&row_to_wordpair(&1))
-      |> Enum.filter(fn pair -> Enum.count(pair) == 2 end)
-
-    IO.inspect(rows)
-    IO.puts("found #{Enum.count(rows)} rows")
+      Req.get!(client, url: path, headers: %{"accept" => ["application/json"]}).body
+      |> get_in(["result", "entries"])
+      |> Enum.map(fn entry ->
+        %{
+          ru:
+            Map.get(entry, "accented")
+            |> juxtapose_accent
+            |> String.normalize(:nfc),
+          de: Enum.join(Map.get(entry, "translations"), "; ") |> String.replace("\"", "")
+        }
+      end)
 
     if Enum.count(rows) > 0 do
       acc = Enum.concat(acc, rows)
-      scrape(client, level, offset + @fetch_size, acc)
+      scrape(client, lang, level, offset + @fetch_size, acc)
     else
       acc
     end
   end
 
-  defp row_to_wordpair(tr) do
-    tds = Floki.find(tr, "td")
-
-    if Enum.count(tds) >= 3 do
-      ru =
-        case Enum.fetch!(tds, 1) |> Floki.find("a") do
-          [{"a", _, [russian]}] -> russian
-          _ -> ""
-        end
-
-      de =
-        case Enum.fetch!(tds, 2) |> Floki.find("p") do
-          [{"p", _, _, german}] -> german
-          _ -> ""
-        end
-
-      [ru, de]
+  defp juxtapose_accent(word) do
+    if String.contains?(word, @raw_accent) do
+      [prefix, suffix] = String.split(word, @raw_accent, parts: 2)
+      [last | rest_reversed] = prefix |> String.graphemes() |> Enum.reverse()
+      Enum.join(Enum.reverse(rest_reversed), "") <> to_string([@combining_accent, last]) <> suffix
     else
-      []
+      word
     end
   end
 
-  defp build_path(level, start) do
-    "/vocab/#{level}?start=#{start}"
+  defp build_path(lang, level, offset) do
+    "/all?start=#{offset}&level=#{level}&lang=#{lang}"
   end
 end
 
-System.argv() |> Enum.fetch!(0) |> OpenrussianScraper.scrape()
+lang = Enum.fetch!(System.argv(), 0)
+level = Enum.fetch!(System.argv(), 1)
+OpenrussianScraper.scrape(lang, level)
