@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-mkdir scraped
+mkdir -p scraped
 
 mix run lib/openrussian_scraper.exs de A1 > scraped/ru-de-a1.csv
 mix run lib/openrussian_scraper.exs de A2 > scraped/ru-de-a2.csv

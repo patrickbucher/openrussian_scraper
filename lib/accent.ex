@@ -8,7 +8,7 @@ defmodule Accent do
 
       if String.length(prefix) > 0 do
         [last | rest_reversed] = prefix |> String.graphemes() |> Enum.reverse()
-        combined = String.normalize(to_string([@combining_accent, last]), :nfc)
+        combined = String.normalize(to_string([last, @combining_accent]), :nfc)
         Enum.join(Enum.reverse(rest_reversed), "") <> combined <> suffix
       else
         to_string([@combining_accent]) <> suffix
