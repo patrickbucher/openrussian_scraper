@@ -19,7 +19,6 @@ defmodule OpenrussianScraper.MixProject do
 
   defp deps do
     [
-      {:floki, "~> 0.37.1"},
       {:req, "~> 0.5.1"}
     ]
   end
