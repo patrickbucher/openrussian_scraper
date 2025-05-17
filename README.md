@@ -16,6 +16,7 @@ Fetch frequency list for English (`en`) translations for level B2:
 
 - [ ] Write an additional script that processes a CSV file.
     - input: words with simple accent: `Достое'вский`: `'` after stressed vowel
+        - alternative: allow to pass a character, e.g. `_`, which is easier to type on the Russian keyboard layout!
     - output: words with stressed vowel and combining character (U+0301)
     - benefit: no need to type in words in Anki; just write your CSV file in a text editor, process it, and import it to Anki
 - [ ] Improve accentuantion algorithm in `Accent.juxtapose_accent/1` so that it supports multiple accents per string (don't pass a `word`, but a `text`).
