@@ -17,10 +17,8 @@ defmodule OpenrussianScraper do
       |> get_in(["result", "entries"])
       |> Enum.map(fn entry ->
         %{
-          ru:
-            Map.get(entry, "accented")
-            |> Accent.juxtapose_accent(),
-          de: Enum.join(Map.get(entry, "translations"), "; ") |> String.replace("\"", "")
+          ru: Map.get(entry, "accented") |> Accent.juxtapose_accent(),
+          de: Map.get(entry, "translations") |> format_translations
         }
       end)
 
@@ -30,6 +28,12 @@ defmodule OpenrussianScraper do
     else
       acc
     end
+  end
+
+  defp format_translations(items) do
+    Enum.zip(1..Enum.count(items), items)
+    |> Enum.map(fn {i, translation} -> "#{i}) #{String.replace(translation, "\"", "")}" end)
+    |> Enum.join(" ")
   end
 
   defp build_path(lang, level, offset) do
