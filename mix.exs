@@ -19,7 +19,8 @@ defmodule OpenrussianScraper.MixProject do
 
   defp deps do
     [
-      {:req, "~> 0.5.1"}
+      {:req, "~> 0.5.1"},
+      {:csv, "~> 3.2"}
     ]
   end
 end

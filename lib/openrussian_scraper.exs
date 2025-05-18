@@ -5,8 +5,12 @@ defmodule OpenrussianScraper do
 
   def scrape(lang, level) when level in @levels do
     client = Req.new(base_url: @base_url)
-    result = scrape(client, lang, level, 0, [])
-    Enum.each(result, fn r -> IO.puts("\"#{Map.get(r, :ru)}\",\"#{Map.get(r, :de)}\"") end)
+
+    scrape(client, lang, level, 0, [])
+    |> Enum.map(fn r -> [r[:ru], r[:de]] end)
+    |> CSV.encode()
+    |> Enum.join()
+    |> IO.puts()
   end
 
   defp scrape(client, lang, level, offset, acc) when lang in ["en", "de"] do
