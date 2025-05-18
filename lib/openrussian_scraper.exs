@@ -17,7 +17,7 @@ defmodule OpenrussianScraper do
       |> get_in(["result", "entries"])
       |> Enum.map(fn entry ->
         %{
-          ru: Map.get(entry, "accented") |> Accent.juxtapose_accent(),
+          ru: Map.get(entry, "accented") |> Accent.combine_accent(),
           de: Map.get(entry, "translations") |> format_translations
         }
       end)
